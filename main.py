@@ -1,12 +1,13 @@
-from models import baseline_anna as Anna
+from models import baseline_anna as Anna, sequential
 from utils import util
 from utils import evaluation as eval
 
 
 
 
-
 if __name__=='__main__':
+
+    # Anna's Baseline
     Baseline_model=Anna.Anna_baseline()
 
     df=util.add_column(Baseline_model.dev_df, 
@@ -24,3 +25,5 @@ if __name__=='__main__':
 
     # Display the accuracy
     print("Accuracy:", accuracy)
+
+
