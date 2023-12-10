@@ -42,7 +42,3 @@ class Anna_baseline:
 
         return entailment_response
     
-
-
-
-

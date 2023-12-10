@@ -1,4 +1,4 @@
-from models import baseline_anna as Anna
+from models import baseline_anna as Anna, sequential
 from utils import util
 from utils import evaluation as eval
 from models.BERT import LoadData
