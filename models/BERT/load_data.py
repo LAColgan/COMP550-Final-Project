@@ -6,12 +6,12 @@ from torch.utils.data import TensorDataset, DataLoader
 
 
 class LoadData:
-    """This class loads data to a specific format from a working folder."""
+    """This class is used to load data in a specific format."""
     def __init__(self, file):
         self.data = file
 
-    def load(self, batch_size=32, shuffle=True):
-        """This function loads data."""
+    def load(self, batch_size=16, shuffle=True):
+        """This function loads data in a required format."""
 
         # Load data file into a pandas df
         df = pd.read_csv(self.data, sep='\t')
