@@ -3,6 +3,7 @@ from utils import util
 from utils import evaluation as eval
 from models.BERT import LoadData
 from models.BERT import FineTune
+from models.BERT import Test
 import os
 
 
@@ -34,5 +35,5 @@ if __name__ == '__main__':
     dev_loader = LoadData(dev_data_file).load()
     val_loader = LoadData(val_data_file).load()
 
-    model = FineTune(dev_loader, val_loader)
-    model.finetune()
+    model = FineTune(train_loader, dev_loader).finetune()
+    test_acc, test_loss = Test(val_loader).test()
