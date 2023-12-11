@@ -31,9 +31,13 @@ if __name__ == '__main__':
     dev_data_file = os.path.join("data", "snli_1.0_dev.txt")
     val_data_file = os.path.join("data", "snli_1.0_test.txt")
 
+    # Load data
     train_loader = LoadData(train_data_file).load()
     dev_loader = LoadData(dev_data_file).load()
     val_loader = LoadData(val_data_file).load()
 
-    model = FineTune(train_loader, dev_loader).finetune()
+    # Uncomment the line below to launch finetuning process
+    # model = FineTune(train_loader, dev_loader).finetune()
+
+    # Test the model on the test dataset
     test_acc, test_loss = Test(val_loader).test()
