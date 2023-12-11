@@ -3,6 +3,11 @@ import torch
 from transformers import BertTokenizer
 from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import TensorDataset, DataLoader
+import logging
+
+
+# Configure basic logging settings
+logging.basicConfig(level=logging.INFO)
 
 
 class LoadData:
@@ -13,16 +18,17 @@ class LoadData:
     def load(self, batch_size=16, shuffle=True):
         """This function loads data in a required format."""
 
+        # Set random seed for PyTorch for results reproducibility
+        torch.manual_seed(42)
+
         # Load data file into a pandas df
         df = pd.read_csv(self.data, sep='\t')
 
-        # Drop NA rows
+        # Drop NA rows and rows witch '-' strings
+        df = df[['sentence1', 'sentence2', 'gold_label']]
+        df = df.replace('-', pd.NA)
         df = df.dropna()
-
-        # Remove all rows containing '-'
-        df = df[~df['sentence1'].str.contains('-')]
-        df = df[~df['sentence2'].str.contains('-')]
-        df = df[~df['gold_label'].str.contains('-')]
+        df = df.iloc[:100000, :]
 
         # Specify labels
         labels = {'entailment': 0, 'contradiction': 1, 'neutral': 2}

@@ -43,7 +43,13 @@ class FineTune:
             model.train()
             train_loss_total = 0
             train_acc_total = 0
+            verbose = 0
             for i, (pair_token_ids, mask_ids, segments_ids, y) in enumerate(self.loader_train):
+
+                # Keep track
+                verbose += 1
+                logging.info(f'Batch number: {verbose} out of {len(self.loader_train)}')
+
                 optimizer.zero_grad()
                 pair_token_ids = pair_token_ids.to(device)
                 mask_ids = mask_ids.to(device)
@@ -83,7 +89,6 @@ class FineTune:
             total_val_loss = 0
             with torch.no_grad():
                 for i, (pair_token_ids, mask_ids, seg_ids, y) in enumerate(self.loader_val):
-                    optimizer.zero_grad()
                     pair_token_ids = pair_token_ids.to(device)
                     mask_ids = mask_ids.to(device)
                     seg_ids = seg_ids.to(device)
@@ -123,4 +128,6 @@ class FineTune:
                 "Elapsed time: {:0>2}:{:0>2}:{:05.2f}".format(int(hours), int(minutes), seconds)
             )
 
-        model.save_pretrained("path/to/save/directory")
+        model.save_pretrained("models/BERT/trained_model")
+
+        return model
