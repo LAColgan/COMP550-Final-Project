@@ -44,6 +44,12 @@ def get_file(filepath):
                 lines.append(line.split('.'))
     return lines
 
+def write_file(list_texts, filepath):
+    with open(filepath, 'w') as file:
+        for line in list_texts:
+            file.write(' '.join(line))
+
+
 def add_rephrases_to_summary(summaries_path, rephrases_path, output):
     summaries=get_file(summaries_path)
     
@@ -53,18 +59,23 @@ def add_rephrases_to_summary(summaries_path, rephrases_path, output):
         subset=df.iloc[mins:maxs]
         for index, summary in enumerate(summaries):
             if len(summary)<=10:
-                summaries[index]=[subset.iloc[index]]+summary if i<5 else summary+[subset.iloc[index]]
+                print(index)
+                if i<5:
+                    summaries[index]=[subset.loc[index+mins, 'Rephrase']]+summary
+
+                else:
+                    summaries[index]=summary[:-1]+[subset.loc[index+mins, 'Rephrase']]+['\n']
 
             else:
                 place=math.floor(len(summary)*(mins/1000))
-                summary.insert(place, subset.iloc[index])
+                summary.insert(place, subset.loc[index+mins, 'Rephrase'])
                 summaries[index]=summary
         mins+=100
         maxs+=100
-    df[['Gold', 'Rephrase']].to_csv(output, index=False)
+    write_file(summaries, output)
     
 
 # file_path = 'booksummaries.txt'
 # output_file = "extracted_100_summaries.txt"
 # extract_summaries(file_path, output_file)
-add_rephrases_to_summary("data/extracted_100_summaries.txt", 'data/10_gold_phrases_and_1000_rephrases.csv', 'data/extracted_100_summaries_with_rephrase.csv')
+#add_rephrases_to_summary("data/extracted_100_summaries.txt", 'data/10_gold_phrases_and_1000_rephrases.csv', 'data/extracted_100_summaries_with_rephrase.txt')
