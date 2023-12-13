@@ -1,3 +1,6 @@
+import math
+import pandas as pd
+
 # Define the function to extract book summaries
 def extract_book_summaries(file_path, num_samples=100, output_file="extracted_100_summaries.txt"):
     with open(file_path, 'r', encoding='utf-8') as file:
@@ -32,6 +35,36 @@ def extract_summaries(input_file, output_file):
             output.write('\n\n'.join(summaries))  # Separate summaries by double newline
 
 
-file_path = 'booksummaries.txt'
-output_file = "extracted_100_summaries.txt"
-extract_summaries(file_path, output_file)
+
+def get_file(filepath):
+    lines=[]
+    with open(filepath, 'r', encoding='utf-8') as f:
+        for line in f.readlines():
+            if line!='\n':
+                lines.append(line.split('.'))
+    return lines
+
+def add_rephrases_to_summary(summaries_path, rephrases_path, output):
+    summaries=get_file(summaries_path)
+    
+    df=pd.read_csv(rephrases_path, encoding='latin-1')
+    mins, maxs=0, 100
+    for i in range(10):
+        subset=df.iloc[mins:maxs]
+        for index, summary in enumerate(summaries):
+            if len(summary)<=10:
+                summaries[index]=[subset.iloc[index]]+summary if i<5 else summary+[subset.iloc[index]]
+
+            else:
+                place=math.floor(len(summary)*(mins/1000))
+                summary.insert(place, subset.iloc[index])
+                summaries[index]=summary
+        mins+=100
+        maxs+=100
+    df[['Gold', 'Rephrase']].to_csv(output, index=False)
+    
+
+# file_path = 'booksummaries.txt'
+# output_file = "extracted_100_summaries.txt"
+# extract_summaries(file_path, output_file)
+add_rephrases_to_summary("data/extracted_100_summaries.txt", 'data/10_gold_phrases_and_1000_rephrases.csv', 'data/extracted_100_summaries_with_rephrase.csv')
