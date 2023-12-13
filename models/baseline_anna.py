@@ -11,6 +11,7 @@ class Anna_baseline:
     def __init__(self) -> None:
         # read the csv file into data frame, use sentence1, sentence2 and gold_label
         self.dev_df=pd.read_csv("data/snli_1.0_dev.txt", sep='\t')
+        
         #self.test_df=pd.read_csv("data/snli_1.0_test.txt", sep='\t')
         #self.train_df=pd.read_csv("data/snli_1.0_train.txt", sep='\t')
 

@@ -1,0 +1,7 @@
+nltk==3.8.1
+pandas==1.5.3
+torch==2.1.1
+transformers==4.35.2
+os
+time
+logging
