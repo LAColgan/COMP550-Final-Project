@@ -71,9 +71,10 @@ def add_rephrases_to_summary(summaries_path, rephrases_path, output):
                 else:
                     summaries[index]=summary[:-1]+[sentence]
 
+
             else:
                 place=math.floor(len(summary)*(mins/1000))
-                summary.insert(place, subset.loc[index+mins, 'Rephrase'])
+                summary.insert(place, sentence)
                 summaries[index]=summary
         mins+=100
         maxs+=100
