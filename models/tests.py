@@ -3,11 +3,15 @@ from transformers import BertForSequenceClassification
 import logging
 import pandas as pd
 import nltk
+import numpy as np
 from nltk import sent_tokenize
 from transformers import BertTokenizer
 from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import TensorDataset, DataLoader
 import torch.nn.functional as f
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+from tensorflow.keras.preprocessing.text import Tokenizer
+from joblib import load
 
 
 nltk.download('punkt')
@@ -129,5 +133,57 @@ def grade_bert(verbose=None):
         logging.info(total_entailments)
         average_grade = total_entailments/1000
         logging.info(average_grade)
-
         return average_grade
+
+
+
+
+
+def grade_sequential(max_sequence_length=50):
+    model=load('sequential.joblib')
+
+    gold_df=pd.read_csv('data/10_gold_phrases_and_1000_rephrases.csv', encoding='latin-1')
+
+    with open('data/extracted_100_summaries_with_rephrase.txt', 'r', encoding='latin-1') as file:
+        summaries = file.read().split('\n')
+
+    golden_sentences=gold_df['Gold'].unique()
+
+    combinations_summaries=[]
+    for summary in summaries:
+        sentences=summary.split('.')
+        summary_combination=[]
+        for g in golden_sentences:
+            summary_combination.extend([(g, sentence) for sentence in sentences])
+
+        combinations_summaries.append(pd.DataFrame(summary_combination, columns=['sentence1', 'sentence2']))
+
+    
+    total_entailment=0
+    for comb_df in combinations_summaries:
+        tokenizer = Tokenizer()
+        tokenizer.fit_on_texts(comb_df['sentence1'].values + comb_df['sentence2'].values)
+        premises_sequences = tokenizer.texts_to_sequences(comb_df["sentence1"])
+        hypotheses_sequences = tokenizer.texts_to_sequences(comb_df["sentence2"])
+
+        premises_padded = pad_sequences(premises_sequences, maxlen=max_sequence_length)
+        hypotheses_padded = pad_sequences(hypotheses_sequences, maxlen=max_sequence_length)
+
+        prediction = model.predict([premises_padded, hypotheses_padded])
+        
+        
+        threshold_prediction = (prediction > 0.8).astype(int)
+        arr=~np.all(threshold_prediction==0, axis=1)
+        filtered_arr=threshold_prediction[arr]
+
+        pred_max=np.argmax(filtered_arr, axis=-1)
+        class_counts = np.bincount(pred_max)
+        if class_counts[1]>10:
+            total_entailment+=10
+        else:
+            total_entailment+=class_counts[1]
+
+    print(f"Entailment accuracy: {total_entailment/1000}")
+
+
+
