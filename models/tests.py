@@ -22,7 +22,7 @@ logging.basicConfig(level=logging.INFO)
 
 def grade_bert(verbose=None):
     """This function tests the algorithm by simulating a grading procedure.
-    It returns accuracy score."""
+    It returns a simulated average grade of a class of 100 students."""
 
     # BERT finetuned model
     model = BertForSequenceClassification.from_pretrained("models/BERT/trained_model")
@@ -42,22 +42,21 @@ def grade_bert(verbose=None):
     gold = pd.read_csv('data/10_gold_phrases_and_1000_rephrases.csv', encoding='cp1252')
     gold = gold['Gold'].drop_duplicates()
 
-    # Open the file
+    # Open the file with simulated student reports
     with open(file_path, 'r') as file:
 
         # Model accuracy variable calculated by dividing total number of entailments by 100 student reports
         # and then divided by 10 in order to get a value from 0 to 1
         total_entailments = 0
 
-        # Iterate over each line (simulated student report) in the file
+        # Iterate over each line (each simulated student report) in the file
         for line in file:
             entailments = 0
 
             # Tokenize sentences in each line
             sentences = [j.strip() for i in line.split('..') for j in sent_tokenize(i)]
-            # print(len(sentences))
 
-            # Find entailments for each gold sentence and count the total entailments found
+            # Iterate through each golden sentence
             for gold_sentence in gold.values:
 
                 token_ids = []
@@ -112,7 +111,7 @@ def grade_bert(verbose=None):
                                            attention_mask=mask_ids).values()
                         prediction = list(prediction)[0]
 
-                        # Transform prediction with log-softmax
+                        # Transform prediction with softmax
                         prediction = f.softmax(prediction, dim=1)
 
                         # Does it entail or not
@@ -132,10 +131,12 @@ def grade_bert(verbose=None):
             else:
                 total_entailments += entailments
         logging.info(total_entailments)
-        accuracy = total_entailments/1000
-        logging.info(accuracy)
+        average_grade = total_entailments/1000
+        logging.info(average_grade)
+        return average_grade
 
-        return accuracy
+
+
 
 
 def grade_sequential(max_sequence_length=50):
