@@ -1,1 +1,2 @@
 data/snli_1.0_train.txt filter=lfs diff=lfs merge=lfs -text
+models/BERT/trained_model/model.safetensors filter=lfs diff=lfs merge=lfs -text
