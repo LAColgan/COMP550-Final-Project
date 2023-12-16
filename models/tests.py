@@ -13,6 +13,8 @@ from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.preprocessing.text import Tokenizer
 from joblib import load
 
+import models.overlapBaseline
+from utils import preprocessing as proc
 
 nltk.download('punkt')
 
@@ -136,9 +138,6 @@ def grade_bert(verbose=None):
         return average_grade
 
 
-
-
-
 def grade_sequential(max_sequence_length=50):
     model=load('sequential.joblib')
 
@@ -185,5 +184,39 @@ def grade_sequential(max_sequence_length=50):
 
     print(f"Entailment accuracy: {total_entailment/1000}")
 
+def test_baseline():
+    with open('../data/extracted_100_summaries_with_rephrase.txt', 'r', encoding='latin-1') as txt_file:
+        txt_data = txt_file.readlines()
+    columns = ['student_txt']
+    data_df = pd.DataFrame(txt_data, columns=columns)
 
+    gold_df = pd.read_csv('../data/10_gold_phrases_and_1000_rephrases.csv', encoding='latin-1')
+    golden_sentences = gold_df['Gold'].unique()
+    golden_df = pd.DataFrame({'Gold': golden_sentences})
+
+    data_df = proc.remove_stop_words_for_test(data_df, "student_txt", 3)
+    golden_df = proc.remove_stop_words_for_test(golden_df, "Gold", 3)
+
+    combinations_summaries = []
+    for line in data_df['student_txt']:
+        sentences = [j.strip() for i in line.split('..') for j in sent_tokenize(i)]
+
+        summary_combination = []
+        for gold_sentence in golden_df['Gold']:
+            summary_combination.extend([(gold_sentence, sentence) for sentence in sentences])
+        combinations_summaries.append(pd.DataFrame(summary_combination, columns=['sentence1', 'sentence2']))
+
+    total_entailment = 0
+    for comb_df in combinations_summaries:
+        entailments_per_summary = 0
+        for _, row in comb_df.iterrows():
+            sample_1 = row['sentence1']
+            sample_2 = row['sentence2']
+            result = models.overlapBaseline.compute_classification(sample_1, sample_2)
+            if result == 'entailment':
+                if entailments_per_summary >= 10:
+                    break
+                entailments_per_summary += 1
+        total_entailment += entailments_per_summary
+    return total_entailment / 1000
 

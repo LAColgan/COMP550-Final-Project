@@ -1,7 +1,8 @@
-# from models import baseline_anna as Anna, sequential
+import models
 from utils import util
 from utils import evaluation as eval
 from models.BERT import LoadData, FineTune, Test
+from models import overlapBaseline
 import os
 from models.tests import grade_bert
 
@@ -10,7 +11,7 @@ if __name__ == '__main__':
 
     # Baseline model
     print('baseline model')
-    Baseline_model = Anna.Anna_baseline()
+    Baseline_model = overlapBaseline.OverlapBaseline('../data/snli_1.0_test.txt')
     df = util.add_column(Baseline_model.dev_df,
                             'classification',
                             [Baseline_model.compute_classification(s1, s2)
@@ -23,6 +24,9 @@ if __name__ == '__main__':
     accuracy = eval.get_accuracy(df['classification'], df['gold_label'])
     # Display the accuracy
     print("Accuracy:", accuracy)
+    #test on summaries data
+    print("Accuracy on test set (students summary): ")
+    print(models.tests.test_baseline())
 
     # BERT model (finetuned)
     print("Bert model")
