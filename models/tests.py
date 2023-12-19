@@ -214,7 +214,7 @@ def test_baseline():
             sample_2 = row['sentence2']
             result = models.overlapBaseline.compute_classification(sample_1, sample_2)
             if result == 'entailment':
-                if entailments_per_summary >= 10:
+                if entailments_per_summary == 10:
                     break
                 entailments_per_summary += 1
         total_entailment += entailments_per_summary
